@@ -14,7 +14,7 @@ services:
       HF_TOKEN: "${HF_TOKEN}"
     command: >
       --model=Qwen/Qwen3-8B-AWQ
-      --max-model-len 4096
+      --max-model-len 8192
       --reasoning-parser qwen3
       --gpu-memory-utilization 0.80
       --enforce-eager
