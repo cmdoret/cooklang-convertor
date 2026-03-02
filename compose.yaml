@@ -1,0 +1,25 @@
+services:
+  # converter:
+  #   environment:
+  #     OPENAI_BASE_URL: "http://vllm:8000/v1"
+  #     OPENAI_API_KEY: "dummy"
+  vllm:
+    image: docker.io/vllm/vllm-openai:latest
+    container_name: cooklang-vllm
+    ports:
+      - "8000:8000"
+    devices:
+      - "nvidia.com/gpu=all"
+    environment:
+      HF_TOKEN: "${HF_TOKEN}"
+    command: >
+      --model=Qwen/Qwen3-8B-AWQ
+      --max-model-len 4096
+      --reasoning-parser qwen3
+      --gpu-memory-utilization 0.80
+      --enforce-eager
+      --dtype auto
+      --host=0.0.0.0
+      --enable-lora
+      --port=8000
+      --uvicorn-log-level=debug

@@ -1,0 +1,13 @@
+[project]
+name = "cooklang-convertor"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.135.0",
+    "openai>=2.24.0",
+    "python-multipart>=0.0.22",
+    "requests>=2.32.5",
+    "uvicorn>=0.41.0",
+]

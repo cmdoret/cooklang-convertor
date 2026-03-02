@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Cooklang Convertor</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-gray-100 text-gray-800">
+        <div class="container mx-auto p-4">
+            <h1 class="text-2xl font-bold mb-4">Cooklang Convertor</h1>
+
+            <!-- Drag-and-Drop Area -->
+            <div
+                id="drop-area"
+                class="border-2 border-dashed border-gray-400 p-6 rounded-lg bg-white text-center"
+            >
+                <p class="text-gray-600">
+                    Drag and drop your files here, or click to upload
+                </p>
+                <input id="file-input" type="file" multiple class="hidden" />
+            </div>
+            <div id="uploaded-files" class="mt-4">
+                <h3 class="text-lg font-semibold">Uploaded Files</h3>
+                <ul id="file-list" class="list-disc pl-5"></ul>
+            </div>
+
+            <!-- Converted Recipes Preview -->
+            <div id="preview" class="mt-6">
+                <h2 class="text-xl font-semibold mb-2">Converted Recipes</h2>
+                <div id="recipes" class="bg-white p-4 rounded-lg shadow"></div>
+            </div>
+
+            <!-- Settings -->
+            <div id="settings" class="mt-6">
+                <h2 class="text-xl font-semibold mb-2">Settings</h2>
+                <label for="system-prompt" class="block text-gray-700"
+                    >System Prompt:</label
+                >
+                <textarea
+                    id="system-prompt"
+                    class="w-full p-2 border rounded-lg"
+                    rows="4"
+                ></textarea>
+                <button
+                    id="save-settings"
+                    class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg"
+                >
+                    Save Settings
+                </button>
+            </div>
+        </div>
+
+        <script>
+            const dropArea = document.getElementById("drop-area");
+            const fileInput = document.getElementById("file-input");
+            const recipesDiv = document.getElementById("recipes");
+            const systemPrompt = document.getElementById("system-prompt");
+            const saveSettingsButton = document.getElementById("save-settings");
+
+            // Fetch the current system prompt on page load
+            document.addEventListener("DOMContentLoaded", async () => {
+                try {
+                    const response = await fetch("/settings/system_prompt/");
+                    if (response.ok) {
+                        const data = await response.json();
+                        systemPrompt.value = data.system_prompt; // Populate the text box
+                    } else {
+                        console.error(
+                            "Failed to fetch system prompt:",
+                            response.statusText,
+                        );
+                    }
+                } catch (error) {
+                    console.error("Error fetching system prompt:", error);
+                }
+            });
+
+            // Drag-and-Drop File Upload
+            dropArea.addEventListener("click", () => fileInput.click());
+            dropArea.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                dropArea.classList.add("bg-gray-200");
+            });
+            dropArea.addEventListener("dragleave", () =>
+                dropArea.classList.remove("bg-gray-200"),
+            );
+            dropArea.addEventListener("drop", async (e) => {
+                e.preventDefault();
+                dropArea.classList.remove("bg-gray-200");
+                const files = e.dataTransfer.files;
+                await uploadFiles(files);
+            });
+            fileInput.addEventListener("change", async (e) => {
+                const files = e.target.files;
+                await uploadFiles(files);
+            });
+
+            // Upload Files to Server
+            async function uploadFiles(files) {
+                const formData = new FormData();
+                for (const file of files) {
+                    formData.append("files", file);
+                }
+                const response = await fetch("/upload/", {
+                    method: "POST",
+                    body: formData,
+                });
+                const data = await response.json();
+                displayUploadedFiles(data.uploaded_files);
+            }
+
+            // Display Uploaded Files
+            function displayUploadedFiles(files) {
+                const fileList = document.getElementById("file-list");
+                fileList.innerHTML = "";
+                files.forEach((file) => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = file.filename;
+                    const convertButton = document.createElement("button");
+                    convertButton.textContent = "Convert";
+                    convertButton.classList.add(
+                        "ml-2",
+                        "px-2",
+                        "py-1",
+                        "bg-blue-500",
+                        "text-white",
+                        "rounded",
+                    );
+                    convertButton.addEventListener("click", () =>
+                        convertFile(file.filename),
+                    );
+                    listItem.appendChild(convertButton);
+                    fileList.appendChild(listItem);
+                });
+            }
+
+            // Convert File
+            async function convertFile(filename) {
+                console.log("convertFile called with filename:", filename); // Debugging log
+                const formData = new URLSearchParams();
+                formData.append("filename", filename.toString());
+                formData.append("system_prompt", systemPrompt.value); // Include custom system prompt
+                console.log("FormData being sent:", formData.toString()); // Debugging log
+                const response = await fetch("/convert/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: formData.toString(),
+                });
+                const data = await response.json();
+                console.log("Response received from server:", data); // Debugging log
+                displayRecipes([data]);
+            }
+
+            // Display Converted Recipes
+            function displayRecipes(recipes) {
+                recipesDiv.innerHTML = "";
+                recipes.forEach((recipe) => {
+                    const recipeDiv = document.createElement("div");
+                    recipeDiv.classList.add(
+                        "mb-4",
+                        "p-4",
+                        "border",
+                        "rounded-lg",
+                    );
+                    recipeDiv.innerHTML = `
+                    <h3 class="font-bold">${recipe.filename}</h3>
+          <pre class="bg-gray-100 p-2 rounded">${recipe.cooklang_recipe}</pre>
+        `;
+                    recipesDiv.appendChild(recipeDiv);
+                });
+            }
+
+            // Save Settings
+            saveSettingsButton.addEventListener("click", async () => {
+                const prompt = systemPrompt.value;
+                await fetch("/settings/system_prompt/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: new URLSearchParams({
+                        new_prompt: prompt,
+                    }).toString(),
+                });
+                alert("Settings saved!");
+            });
+        </script>
+    </body>
+</html>

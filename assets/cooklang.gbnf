@@ -1,0 +1,63 @@
+root ::= block*
+
+block ::= ws* ( metadata | comment-line | section-header | note-line | step-line | blank-line )
+
+blank-line ::= newline
+
+metadata ::= ">>" ws* meta-key ws* ":" ws* meta-value newline
+meta-key ::= [^\n:]+
+meta-value ::= [^\n]*
+
+comment-line ::= "--" [^\n]* newline
+
+section-header ::= "=" ws* [^\n]+ newline
+
+note-line ::= ">" note-line-rest newline
+note-line-rest ::= [^>\n] [^\n]* | ""
+
+step-line ::= step-token+ newline
+step-token ::= ingredient | cookware | timer | block-comment | word | punctuation | ws+
+
+ingredient ::= "@" optional-marker ing-name-braced ing-annotation? | "@" optional-marker ing-name-bare ing-amount? ing-annotation?
+ing-name-braced ::= name-chars ing-name-extra-words ws* "{" ing-quantity? "}"
+ing-name-extra-words ::= ws+ name-chars ing-name-extra-words | ""
+ing-name-bare ::= name-char+
+ing-amount ::= "{" ing-quantity? "}"
+
+optional-marker ::= "?" | ""
+
+ing-quantity ::= quantity "%" unit | quantity | "%" unit
+
+quantity ::= mixed-number | fraction | decimal | quantity-range | unicode-fraction | integer
+mixed-number ::= integer "," fraction
+fraction ::= integer "/" pos-integer
+decimal ::= [0-9]+ "." [0-9]+
+integer ::= "-"? [0-9]+
+pos-integer ::= [1-9] [0-9]*
+quantity-range ::= integer ws* "-" ws* integer
+unicode-fraction ::= "\u00bd" | "\u00bc" | "\u00be" | "\u2153" | "\u2154" | "\u215b" | "\u215c" | "\u215d" | "\u215e"
+
+unit ::= [^\n{}\[\]%]+
+
+ing-annotation ::= "(" [^)\n]* ")"
+
+cookware ::= "#" optional-marker cw-name-braced | "#" optional-marker cw-name-bare
+cw-name-braced ::= name-chars cw-name-extra-words ws* "{" "}"
+cw-name-extra-words ::= ws+ name-chars cw-name-extra-words | ""
+cw-name-bare ::= name-char+
+
+timer ::= "~" timer-name "{" timer-quantity "}" | "~" "{" timer-quantity "}"
+timer-name ::= name-char+
+timer-quantity ::= quantity "%" unit
+
+block-comment ::= "[-" block-comment-chars "-]"
+block-comment-chars ::= block-comment-char*
+block-comment-char ::= [^-] | "-" [^\]]
+
+name-chars ::= name-char+
+name-char ::= [a-zA-Z0-9_']
+
+word ::= [^ \t\r\n@#~\[{(>]+
+punctuation ::= [.,;:!?()\[\]{}@#~%/]
+ws ::= [ \t]
+newline ::= "\n" | "\r\n" | "\r"
