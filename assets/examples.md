@@ -1,7 +1,7 @@
 ```cooklang
 >> name: -- Parsed Metadata
 >> title: Caramelized Brown Butter Rice Krispies Treats
->> description: Browning the butter elevates these plebeian snacks into something more toothsome, and it adds just an extra couple of minutes to the process. 
+>> description: Browning the butter elevates these plebeian snacks into something more toothsome, and it adds just an extra couple of minutes to the process.
 >> source: https://cooking.nytimes.com/recipes/11587-caramelized-brown-butter-rice-krispies-treats
 >> tags: easy, desert
 >> prep time: 5
@@ -89,17 +89,17 @@ Prepare the @heirloom tomato{1%unit}(large + very ripe) by slicing it into thick
 
 @Salt and @pepper the tomato slices. Lightly toast some @white sandwich bread{4%slices}(should be soft, like brioche or milk bread).
 
-Spread a generous amount of @mayonnaise on each slice of bread, then sprinkle with @furikake. 
+Spread a generous amount of @mayonnaise on each slice of bread, then sprinkle with @furikake.
 
 Divide the tomato slices between 2 slices of bread, then sandwich with the remaining bread.
 
 Cut the sandwiches diagonally and eat immediately.
 
 = Homemade Furikake
- 
-Pulse in a #?mini food processor{} some @?roasted seaweed{5%grams}, @?coarse kosher salt{1%teaspoon} and @?granulated sugar{½%teaspoon} until fine. 
 
-Stir in @?sesame seeds{2%teaspoons} or @?everything bagel seasoning{}, and a pinch of @?MSG{1%pinch}, such as Aji-No-Moto brand seasoning. 
+Pulse in a #?mini food processor{} some @?roasted seaweed{5%grams}, @?coarse kosher salt{1%teaspoon} and @?granulated sugar{½%teaspoon} until fine.
+
+Stir in @?sesame seeds{2%teaspoons} or @?everything bagel seasoning{}, and a pinch of @?MSG{1%pinch}, such as Aji-No-Moto brand seasoning.
 
 >Beyond the tomato sandwich, you can sprinkle this homemade seasoning over a bowl of fresh white rice, roasted vegetables and all manner of eggs.
 ```

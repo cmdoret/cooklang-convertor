@@ -7,16 +7,16 @@ Drag and drop text files to convert and the server will convert them to cooklang
 
 ## Requirements
 
-* 12GB VRAM
-* docker
-* Nvidia GPU
+- 12GB VRAM
+- docker
+- Nvidia GPU
 
 ## TODO
 
-* [ ] Batch directory conversion
-* [ ] Batch export
-* [ ] Manual output editing
-* [ ] Progress bar
+- [ ] Batch directory conversion
+- [ ] Batch export
+- [ ] Manual output editing
+- [ ] Progress bar
 
 ## How to use
 
