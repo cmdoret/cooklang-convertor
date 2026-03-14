@@ -1,7 +1,9 @@
 import os
+import asyncio
 from typing import List
 
 import openai
+from openai import AsyncOpenAI
 import requests
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,7 +31,7 @@ UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # Load Cooklang EBNF Grammar
-with open("assets/cooklang.gbnf", "r") as f:
+with open("assets/cooklang-minimal.gbnf", "r") as f:
     cooklang_grammar = f.read()
 
 # Load Example System Prompt
@@ -37,7 +39,7 @@ with open("assets/examples.md", "r") as f:
     examples_prompt = f.read()
 
 # In-Memory System Prompt Storage
-default_system_prompt = f"Here are example recipes in Cooklang format:\n\n{examples_prompt}\n\nConvert the recipe below to Cooklang format. Give me the cooklang file and nothing else.\n\n"
+default_system_prompt = f"Here are example recipes in Cooklang format:\n\n{examples_prompt}\n\n"
 
 # VLLM API Configuration
 VLLM_API_URL = "http://localhost:8000/v1/chat/completions"
@@ -100,7 +102,10 @@ async def convert_file(filename: str = Form(...), system_prompt: str = Form(None
                     "role": "system",
                     "content": context,
                 },
-                {"role": "user", "content": recipe},
+                {
+                    "role": "user",
+                    "content": f"Convert the recipe below to Cooklang format. Give me the cooklang file and nothing else.\n\n{recipe}"
+                },
             ],
             extra_body={"structured_outputs": {"grammar": cooklang_grammar}},
         )
@@ -116,6 +121,46 @@ async def convert_file(filename: str = Form(...), system_prompt: str = Form(None
     return JSONResponse(
         content={"filename": filename, "cooklang_recipe": converted_recipe}
     )
+
+
+@app.post("/convert_batch/")
+async def convert_batch_files(filenames: List[str] = Form(...), system_prompt: str = Form(None)):
+    """
+    Endpoint to convert multiple uploaded files to Cooklang format concurrently.
+    """
+    context = system_prompt if system_prompt else default_system_prompt
+
+    async def convert_single(filename: str):
+        file_path = os.path.join(UPLOAD_DIR, filename)
+
+        if not os.path.exists(file_path):
+            return {"filename": filename, "error": "File not found."}
+
+        with open(file_path, "r") as f:
+            recipe = f.read()
+
+        try:
+            client = AsyncOpenAI()
+
+            response = await client.chat.completions.create(
+                model="Qwen/Qwen3-8B-AWQ",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": context,
+                    },
+                    {"role": "user", "content": recipe},
+                ],
+                extra_body={"structured_outputs": {"grammar": cooklang_grammar}},
+            )
+            converted_recipe = response.choices[0].message.content
+            return {"filename": filename, "cooklang_recipe": converted_recipe}
+        except Exception as e:
+            print(f"Error during VLLM API call for {filename}: {e}")
+            return {"filename": filename, "error": str(e)}
+
+    results = await asyncio.gather(*(convert_single(fname) for fname in filenames))
+    return JSONResponse(content={"results": results})
 
 
 # Settings Model
