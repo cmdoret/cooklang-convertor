@@ -1,0 +1,23 @@
+root ::= block*
+
+block ::= ws* ( metadata | comment | step | blank )
+
+blank ::= newline
+ws ::= [ \t]
+newline ::= "\n" | "\r\n" | "\r"
+
+metadata ::= ">>" ws* [^:\n]+ ":" [^\n]* newline
+
+comment ::= "--" [^\n]* newline
+
+step ::= step-item+ newline
+
+step-item ::= ingredient | cookware | timer | text | ws+
+
+ingredient ::= "@" word | "@" multiword ws* "{" [^}\n]* "}"
+cookware ::= "#" word | "#" multiword ws* "{" [^}\n]* "}"
+timer ::= "~" word ws* "{" [^}\n]* "}" | "~" ws* "{" [^}\n]* "}" | "~" word
+
+word ::= [a-zA-Z0-9_']+
+multiword ::= [a-zA-Z0-9_' ]+
+text ::= [^@#~\n \t]+
