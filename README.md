@@ -13,7 +13,7 @@ Drag and drop text files to convert and the server will convert them to cooklang
 - docker
 - Nvidia GPU
 
-### needed
+### optional
 
 - just
 - nix
