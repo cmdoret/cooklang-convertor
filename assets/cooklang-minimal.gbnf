@@ -6,18 +6,18 @@ blank ::= newline
 ws ::= [ \t]
 newline ::= "\n" | "\r\n" | "\r"
 
-metadata ::= ">>" ws* [^:\n]+ ":" [^\n]* newline
+metadata ::= ">>" ws+ [a-zA-Z0-9]+ ":" [^\n]* newline
 
 comment ::= "--" [^\n]* newline
 
-step ::= step-item+ newline
+step ::= step-item+ newline{2}
 
 step-item ::= ingredient | cookware | timer | text | ws+
 
-ingredient ::= "@" word | "@" multiword ws* "{" [^}\n]* "}"
-cookware ::= "#" word | "#" multiword ws* "{" [^}\n]* "}"
-timer ::= "~" word ws* "{" [^}\n]* "}" | "~" ws* "{" [^}\n]* "}" | "~" word
+ingredient ::= "@" (word | multiword) "{" [^}\n]* "}"
+cookware ::= "#" (word | multiword) "{" [^}\n]* "}"
+timer ::= "~" (word | multiword)? "{" [0-9]+ word "}"
 
 word ::= [a-zA-Z0-9_']+
-multiword ::= [a-zA-Z0-9_' ]+
+multiword ::= word (ws word)+
 text ::= [^@#~\n \t]+
